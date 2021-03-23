@@ -90,7 +90,7 @@ func (c *CPU) Run(clock *time.Ticker) {
 		instr = instruction.FetchInstruction(op)
 		extra := c.LoadInstruction(instr)
 		tts := instr.Cycles + int(extra)
-		log.Printf("A: %X, X: %X, Y: %X", c.AC, c.X, c.Y)
+		log.Printf("A: %02X, X: %02X, Y: %02X", c.AC, c.X, c.Y)
 		for tts > 0 {
 			tts--
 			<-clock.C

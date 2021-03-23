@@ -1,9 +1,17 @@
 package bus
 
+type Type byte
+
+const (
+	RW Type = 1 << iota
+	RO
+)
+
 type ByteBus struct {
 	StartVal uint16
 	Arr      []byte
 	Name     string
+	Type
 }
 
 func (b *ByteBus) Start() uint16 {
@@ -20,8 +28,10 @@ func (b *ByteBus) LoadAddress(address uint16) byte {
 }
 
 func (b *ByteBus) WriteAddress(address uint16, data byte) {
-	address = address - b.StartVal
-	b.Arr[address] = data
+	if b.Type != RO {
+		address = address - b.StartVal
+		b.Arr[address] = data
+	}
 }
 
 func (b *ByteBus) GetName() string {
