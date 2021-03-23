@@ -1,8 +1,8 @@
 package cpu
 
 import (
-	"idkcpu/pkg/bus"
-	"idkcpu/pkg/instruction"
+	"github.com/J00LZZ/go6502/pkg/bus"
+	"github.com/J00LZZ/go6502/pkg/instruction"
 	"log"
 	"time"
 )
