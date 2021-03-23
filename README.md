@@ -13,5 +13,10 @@ computers when he was younger.
     * [ ] Add a basic graphics device
     * [ ] Add a realistic graphics device (vga-like output)
     * [ ] Add a device that captures "input"
+    * [ ] Add a MMU (memory mapper)
+    * [ ] Add a FPU (floating point support)
+    * [ ] Add an APU (audio support)
+    * [ ] Add an IMU (interrupt management unit)
+    * [ ] Add a DTB (Device Tree blob, tihi)
  * [ ] maybe more?
 

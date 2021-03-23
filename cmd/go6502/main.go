@@ -30,7 +30,7 @@ func main() {
 		log.Panic(err)
 	}
 
-	rom := &bus.ByteBus{StartVal: 0x8000, Arr: blink, Name: "ROM", Type: bus.RO}
+	rom := &bus.ByteBus{StartVal: 0x8000, Arr: blink, Name: "ROM", Type: bus.R}
 	b := bus.Bus{Devices: []bus.Device{ram, rom}}
 	c := cpu.CPU{
 		PC:  0x8000,
