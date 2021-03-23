@@ -110,26 +110,27 @@ func (c *CPU) LoadInstruction(instr *instruction.Instruction) byte {
 }
 
 func (c *CPU) dataAddr(mode instruction.Mode) (uint16, byte) {
-	if mode == instruction.Acc {
+	switch mode {
+	case instruction.Acc:
 		return 0, 0
-	} else if mode == instruction.Immediate {
+	case instruction.Immediate:
 		d := c.PC
 		c.PC++
 		return d, 0
-	} else if mode == instruction.Abs {
+	case instruction.Abs:
 		low := uint16(c.readAddr())
 		c.PC++
 		high := uint16(c.readAddr())
 		c.PC++
 		addr := low | (high << 8)
 		return addr, 0
-	} else if mode == instruction.Zpg {
+	case instruction.Zpg:
 		d := uint16(c.readAddr())
 		c.PC++
 		return d, 0
-	} else if mode == instruction.Impl {
+	case instruction.Impl:
 		return 0, 0
-	} else if mode == instruction.Rel {
+	case instruction.Rel:
 		offset := c.readAddr()
 		c.PC++
 		off2 := int8(offset)
@@ -147,7 +148,7 @@ func (c *CPU) dataAddr(mode instruction.Mode) (uint16, byte) {
 			}
 			return addr, 0
 		}
-	} else if mode == instruction.Ind {
+	case instruction.Ind:
 		low := uint16(c.readAddr())
 		c.PC++
 		high := uint16(c.readAddr())
@@ -156,17 +157,17 @@ func (c *CPU) dataAddr(mode instruction.Mode) (uint16, byte) {
 		effL := uint16(c.Bus.ReadAddress(abs))
 		effH := uint16(c.Bus.ReadAddress((abs & 0xFF00) + ((abs + 1) & 0x00FF)))
 		return effL + (effH << 8), 0
-	} else if mode == instruction.ZpgX {
+	case instruction.ZpgX:
 		z := uint16(c.readAddr())
 		c.PC++
 		z += uint16(c.X)
 		return z & 0xFF, 0
-	} else if mode == instruction.ZpgY {
+	case instruction.ZpgY:
 		z := uint16(c.readAddr())
 		c.PC++
 		z += uint16(c.Y)
 		return z & 0xFF, 0
-	} else if mode == instruction.AbsX {
+	case instruction.AbsX:
 		low := uint16(c.readAddr())
 		c.PC++
 		high := uint16(c.readAddr())
@@ -176,7 +177,7 @@ func (c *CPU) dataAddr(mode instruction.Mode) (uint16, byte) {
 			return abs, 1
 		}
 		return abs, 0
-	} else if mode == instruction.AbsY {
+	case instruction.AbsY:
 		low := uint16(c.readAddr())
 		c.PC++
 		high := uint16(c.readAddr())
@@ -186,13 +187,13 @@ func (c *CPU) dataAddr(mode instruction.Mode) (uint16, byte) {
 			return abs, 1
 		}
 		return abs, 0
-	} else if mode == instruction.Xind {
+	case instruction.Xind:
 		low := (uint16(c.readAddr()) + uint16(c.X)) & 0xFF
 		high := (low + 1) & 0xFF
 		c.PC++
 		addr := uint16(c.ReadAddress(low)) + (uint16(c.ReadAddress(high)) << 8)
 		return addr, 0
-	} else if mode == instruction.IndY {
+	case instruction.IndY:
 		low := uint16(c.readAddr())
 		high := (low + 1) & 0xFF
 		c.PC++
@@ -204,7 +205,8 @@ func (c *CPU) dataAddr(mode instruction.Mode) (uint16, byte) {
 }
 
 func (c *CPU) execute(opcode instruction.Opcode, data uint16) byte {
-	if opcode == instruction.ADC {
+	switch opcode {
+	case instruction.ADC:
 		m := c.ReadAddress(data)
 		res := uint16(m) + uint16(c.AC) + uint16(c.IfCarry())
 		c.SetZero16(res)
@@ -232,13 +234,13 @@ func (c *CPU) execute(opcode instruction.Opcode, data uint16) byte {
 			c.SetCarry(res > 0xFF)
 		}
 		c.AC = byte(res & 0xFF)
-	} else if opcode == instruction.AND {
+	case instruction.AND:
 		d := c.ReadAddress(data)
 		res := d & c.AC
 		c.SetNegative8(res)
 		c.SetZero8(res)
 		c.AC = res
-	} else if opcode == instruction.ASL {
+	case instruction.ASL:
 		m := c.ReadAddress(data)
 		c.SetCarry(m&0x80 != 0)
 		m <<= 1
@@ -246,7 +248,7 @@ func (c *CPU) execute(opcode instruction.Opcode, data uint16) byte {
 		c.SetNegative8(m & 0x80)
 		c.SetZero8(m)
 		c.Bus.WriteAddress(data, m)
-	} else if opcode == instruction.ASL_ACC {
+	case instruction.ASL_ACC:
 		m := c.AC
 		c.SetCarry(m&0x80 != 0)
 		m <<= 1
@@ -254,7 +256,7 @@ func (c *CPU) execute(opcode instruction.Opcode, data uint16) byte {
 		c.SetNegative8(m & 0x80)
 		c.SetZero8(m)
 		c.AC = m
-	} else if opcode == instruction.BCC {
+	case instruction.BCC:
 		if !c.Has(C) {
 			x := byte(0)
 			if (data >> 8) == c.PC>>8 {
@@ -265,7 +267,7 @@ func (c *CPU) execute(opcode instruction.Opcode, data uint16) byte {
 			c.PC = data
 			return x
 		}
-	} else if opcode == instruction.BCS {
+	case instruction.BCS:
 		if c.Has(C) {
 			x := byte(0)
 			if (data >> 8) == c.PC>>8 {
@@ -276,7 +278,7 @@ func (c *CPU) execute(opcode instruction.Opcode, data uint16) byte {
 			c.PC = data
 			return x
 		}
-	} else if opcode == instruction.BEQ {
+	case instruction.BEQ:
 		if c.Has(Z) {
 			x := byte(0)
 			if (data >> 8) == c.PC>>8 {
@@ -287,13 +289,13 @@ func (c *CPU) execute(opcode instruction.Opcode, data uint16) byte {
 			c.PC = data
 			return x
 		}
-	} else if opcode == instruction.BIT {
+	case instruction.BIT:
 		m := c.ReadAddress(data)
 		res := m & c.AC
 		c.SetNegative8(res & 0x80)
 		c.SR = (c.SR & 0x3F) | StatusFlags(m&0xC0)
 		c.SetZero8(res)
-	} else if opcode == instruction.BMI {
+	case instruction.BMI:
 		if c.Has(N) {
 			x := byte(0)
 			if (data >> 8) == c.PC>>8 {
@@ -304,7 +306,7 @@ func (c *CPU) execute(opcode instruction.Opcode, data uint16) byte {
 			c.PC = data
 			return x
 		}
-	} else if opcode == instruction.BNE {
+	case instruction.BNE:
 		if !c.Has(Z) {
 			x := byte(0)
 			if (data >> 8) == c.PC>>8 {
@@ -315,7 +317,7 @@ func (c *CPU) execute(opcode instruction.Opcode, data uint16) byte {
 			c.PC = data
 			return x
 		}
-	} else if opcode == instruction.BPL {
+	case instruction.BPL:
 		if !c.Has(N) {
 			x := byte(0)
 			if (data >> 8) == c.PC>>8 {
@@ -326,12 +328,12 @@ func (c *CPU) execute(opcode instruction.Opcode, data uint16) byte {
 			c.PC = data
 			return x
 		}
-	} else if opcode == instruction.BRK {
+	case instruction.BRK:
 		c.PC++
 		c.pushPC()
 		c.pushStack(byte(c.SR | B))
 		c.PC = uint16(c.ReadAddress(IrqVectorH))<<8 + uint16(c.ReadAddress(IrqVectorL))
-	} else if opcode == instruction.BVC {
+	case instruction.BVC:
 		if !c.Has(V) {
 			x := byte(0)
 			if (data >> 8) == c.PC>>8 {
@@ -342,7 +344,7 @@ func (c *CPU) execute(opcode instruction.Opcode, data uint16) byte {
 			c.PC = data
 			return x
 		}
-	} else if opcode == instruction.BVS {
+	case instruction.BVS:
 		if c.Has(V) {
 			x := byte(0)
 			if (data >> 8) == c.PC>>8 {
@@ -353,126 +355,126 @@ func (c *CPU) execute(opcode instruction.Opcode, data uint16) byte {
 			c.PC = data
 			return x
 		}
-	} else if opcode == instruction.CLC {
+	case instruction.CLC:
 		c.Clear(C)
-	} else if opcode == instruction.CLD {
+	case instruction.CLD:
 		c.Clear(D)
-	} else if opcode == instruction.CLI {
+	case instruction.CLI:
 		c.Clear(I)
-	} else if opcode == instruction.CLV {
+	case instruction.CLV:
 		c.Clear(V)
-	} else if opcode == instruction.CMP {
+	case instruction.CMP:
 		tmp := uint16(c.AC) - uint16(c.ReadAddress(data))
 		c.SetCarry(tmp < 0x100)
 		c.SetNegative16(tmp & 0x80)
 		c.SetZero16(tmp)
-	} else if opcode == instruction.CPX {
+	case instruction.CPX:
 		tmp := uint16(c.X) - uint16(c.ReadAddress(data))
 		c.SetCarry(tmp < 0x100)
 		c.SetNegative16(tmp & 0x80)
 		c.SetZero16(tmp)
-	} else if opcode == instruction.CPY {
+	case instruction.CPY:
 		tmp := uint16(c.Y) - uint16(c.ReadAddress(data))
 		c.SetCarry(tmp < 0x100)
 		c.SetNegative16(tmp & 0x80)
 		c.SetZero16(tmp)
-	} else if opcode == instruction.DEC {
+	case instruction.DEC:
 		tmp := c.ReadAddress(data)
 		tmp = (tmp - 1) & 0xFF
 		c.SetNegative8(tmp)
 		c.SetZero8(tmp)
 		c.WriteAddress(data, tmp)
-	} else if opcode == instruction.DEX {
+	case instruction.DEX:
 		tmp := c.X
 		tmp = (tmp - 1) & 0xFF
 		c.SetNegative8(tmp)
 		c.SetZero8(tmp)
 		c.X = tmp
-	} else if opcode == instruction.DEY {
+	case instruction.DEY:
 		tmp := c.Y
 		tmp = (tmp - 1) & 0xFF
 		c.SetNegative8(tmp)
 		c.SetZero8(tmp)
 		c.Y = tmp
-	} else if opcode == instruction.EOR {
+	case instruction.EOR:
 		m := c.ReadAddress(data)
 		m = c.AC ^ m
 		c.SetNegative8(m)
 		c.SetZero8(m)
 		c.AC = m
-	} else if opcode == instruction.INC {
+	case instruction.INC:
 		tmp := c.ReadAddress(data)
 		tmp = (tmp + 1) & 0xFF
 		c.SetNegative8(tmp)
 		c.SetZero8(tmp)
 		c.WriteAddress(data, tmp)
-	} else if opcode == instruction.INX {
+	case instruction.INX:
 		tmp := c.X
 		tmp = (tmp + 1) & 0xFF
 		c.SetNegative8(tmp)
 		c.SetZero8(tmp)
 		c.X = tmp
-	} else if opcode == instruction.INY {
+	case instruction.INY:
 		tmp := c.Y
 		tmp = (tmp + 1) & 0xFF
 		c.SetNegative8(tmp)
 		c.SetZero8(tmp)
 		c.Y = tmp
-	} else if opcode == instruction.JMP {
+	case instruction.JMP:
 		c.PC = data
-	} else if opcode == instruction.JSR {
+	case instruction.JSR:
 		c.PC--
 		c.pushPC()
 		c.PC = data
-	} else if opcode == instruction.LDA {
+	case instruction.LDA:
 		m := c.ReadAddress(data)
 		c.SetNegative8(m)
 		c.SetZero8(m)
 		c.AC = m
-	} else if opcode == instruction.LDX {
+	case instruction.LDX:
 		m := c.ReadAddress(data)
 		c.SetNegative8(m)
 		c.SetZero8(m)
 		c.X = m
-	} else if opcode == instruction.LDY {
+	case instruction.LDY:
 		m := c.ReadAddress(data)
 		c.SetNegative8(m)
 		c.SetZero8(m)
 		c.Y = m
-	} else if opcode == instruction.LSR {
+	case instruction.LSR:
 		m := c.ReadAddress(data)
 		c.SetCarry(m&0x01 != 0)
 		m >>= 1
 		c.SetNegative8(0)
 		c.SetZero8(m)
 		c.WriteAddress(data, m)
-	} else if opcode == instruction.LSR_ACC {
+	case instruction.LSR_ACC:
 		m := c.AC
 		c.SetCarry(m&0x01 != 0)
 		m >>= 1
 		c.SetNegative8(0)
 		c.SetZero8(m)
 		c.AC = m
-	} else if opcode == instruction.NOP {
+	case instruction.NOP:
 		return 0
-	} else if opcode == instruction.ORA {
+	case instruction.ORA:
 		d := c.ReadAddress(data)
 		res := d | c.AC
 		c.SetNegative8(res)
 		c.SetZero8(res)
 		c.AC = res
-	} else if opcode == instruction.PHA {
+	case instruction.PHA:
 		c.pushStack(c.AC)
-	} else if opcode == instruction.PHP {
+	case instruction.PHP:
 		c.pushStack(byte(c.SR | B))
-	} else if opcode == instruction.PLA {
+	case instruction.PLA:
 		c.AC = c.popStack()
 		c.SetNegative8(c.AC)
 		c.SetZero8(c.AC)
-	} else if opcode == instruction.PLP {
+	case instruction.PLP:
 		c.SR = StatusFlags(c.popStack())
 		c.Set(Unused)
-	} else if opcode == instruction.ROL {
+	case instruction.ROL:
 		m := uint16(c.ReadAddress(data))
 		m <<= 1
 		if c.Has(C) {
@@ -483,7 +485,7 @@ func (c *CPU) execute(opcode instruction.Opcode, data uint16) byte {
 		c.SetNegative16(m & 0x80)
 		c.SetZero16(m)
 		c.WriteAddress(data, byte(m))
-	} else if opcode == instruction.ROL_ACC {
+	case instruction.ROL_ACC:
 		m := uint16(c.AC)
 		m <<= 1
 		if c.Has(C) {
@@ -494,7 +496,7 @@ func (c *CPU) execute(opcode instruction.Opcode, data uint16) byte {
 		c.SetNegative16(m & 0x80)
 		c.SetZero16(m)
 		c.AC = byte(m)
-	} else if opcode == instruction.ROR {
+	case instruction.ROR:
 		m := uint16(c.ReadAddress(data))
 		if c.Has(C) {
 			m |= 0x0100
@@ -505,7 +507,7 @@ func (c *CPU) execute(opcode instruction.Opcode, data uint16) byte {
 		c.SetNegative16(m & 0x80)
 		c.SetZero16(m)
 		c.WriteAddress(data, byte(m))
-	} else if opcode == instruction.ROR_ACC {
+	case instruction.ROR_ACC:
 		m := uint16(c.AC)
 		if c.Has(C) {
 			m |= 0x0100
@@ -516,16 +518,16 @@ func (c *CPU) execute(opcode instruction.Opcode, data uint16) byte {
 		c.SetNegative16(m & 0x80)
 		c.SetZero16(m)
 		c.AC = byte(m)
-	} else if opcode == instruction.RTI {
+	case instruction.RTI:
 		c.SR = StatusFlags(c.popStack())
 		low := uint16(c.popStack())
 		high := uint16(c.popStack())
 		c.PC = low | (high << 8)
-	} else if opcode == instruction.RTS {
+	case instruction.RTS:
 		low := uint16(c.popStack())
 		high := uint16(c.popStack())
 		c.PC = (low | (high << 8)) + 1
-	} else if opcode == instruction.SBC {
+	case instruction.SBC:
 		m := uint16(c.ReadAddress(data))
 		tmp := uint16(c.AC) - m - uint16(1-c.IfCarry())
 		c.SetNegative16(tmp & 0x80)
@@ -545,41 +547,41 @@ func (c *CPU) execute(opcode instruction.Opcode, data uint16) byte {
 		}
 		c.SetCarry(tmp < 0x100)
 		c.AC = byte(tmp & 0xFF)
-	} else if opcode == instruction.SEC {
+	case instruction.SEC:
 		c.Set(C)
-	} else if opcode == instruction.SED {
+	case instruction.SED:
 		c.Set(D)
-	} else if opcode == instruction.SEI {
+	case instruction.SEI:
 		c.Set(I)
-	} else if opcode == instruction.STA {
+	case instruction.STA:
 		c.WriteAddress(data, c.AC)
-	} else if opcode == instruction.STX {
+	case instruction.STX:
 		c.WriteAddress(data, c.X)
-	} else if opcode == instruction.STY {
+	case instruction.STY:
 		c.WriteAddress(data, c.Y)
-	} else if opcode == instruction.TAX {
+	case instruction.TAX:
 		m := c.AC
 		c.SetNegative8(m)
 		c.SetZero8(m)
 		c.X = m
-	} else if opcode == instruction.TAY {
+	case instruction.TAY:
 		m := c.AC
 		c.SetNegative8(m)
 		c.SetZero8(m)
 		c.Y = m
-	} else if opcode == instruction.TSX {
+	case instruction.TSX:
 		m := c.SP
 		c.SetNegative8(m)
 		c.SetZero8(m)
 		c.X = m
-	} else if opcode == instruction.TXA {
+	case instruction.TXA:
 		m := c.X
 		c.SetNegative8(m)
 		c.SetZero8(m)
 		c.AC = m
-	} else if opcode == instruction.TXS {
+	case instruction.TXS:
 		c.SP = c.X
-	} else if opcode == instruction.TYA {
+	case instruction.TYA:
 		m := c.Y
 		c.SetNegative8(m)
 		c.SetZero8(m)
