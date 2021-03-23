@@ -33,10 +33,9 @@ func main() {
 	rom := &bus.ByteBus{StartVal: 0x8000, Arr: blink, Name: "ROM", Type: bus.R}
 	b := bus.Bus{Devices: []bus.Device{ram, rom}}
 	c := cpu.CPU{
-		PC:  0x8000,
-		X:   0,
 		Bus: &b,
 	}
+	c.Reset()
 	tickSpeed := time.Second / 10
 	ticker := time.NewTicker(tickSpeed)
 	c.Run(ticker)
