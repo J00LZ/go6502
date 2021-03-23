@@ -64,10 +64,6 @@ func window(c cpu.CPU, ticker *time.Ticker, vram *bus.ByteBus) {
 		<-ticker.C
 		pixels2 := make([]byte, 0x4000)
 		for i, v := range vram.Arr {
-			//R = (byte) ((rgb8 & 0xE0) >> 5);     // rgb8 & 1110 0000  >> 5
-			//G = (byte ((rgb8 & 0x1C) >> 2);     // rgb8 & 0001 1100  >> 2
-			//B = (byte (rgb8 & 0x03);            // rgb8 & 0000 0011
-
 			pallet := v >> 5
 			index := v & 0b11111
 			c := graphics.Pallets[pallet][index]
