@@ -20,12 +20,13 @@ const NmiVectorH uint16 = 0xFFFB
 const NmiVectorL uint16 = 0xFFFA
 
 type CPU struct {
-	PC uint16
-	AC byte
-	X  byte
-	Y  byte
-	SR StatusFlags
-	SP byte
+	PC    uint16
+	AC    byte
+	X     byte
+	Y     byte
+	SR    StatusFlags
+	SP    byte
+	Pause bool
 	*bus.Bus
 }
 
@@ -81,10 +82,12 @@ func (c *CPU) Reset() {
 	c.SR |= Unused
 }
 
-func (c *CPU) Run(clock *time.Ticker) {
+func (c *CPU) Run(clock <-chan time.Time) {
 	var op byte
 	var instr *instruction.Instruction
 	for {
+		for c.Pause {
+		}
 		op = c.readAddr()
 		c.PC++
 		instr = instruction.FetchInstruction(op)
@@ -93,7 +96,7 @@ func (c *CPU) Run(clock *time.Ticker) {
 		log.Printf("A: %02X, X: %02X, Y: %02X", c.AC, c.X, c.Y)
 		for tts > 0 {
 			tts--
-			<-clock.C
+			<-clock
 		}
 	}
 }
