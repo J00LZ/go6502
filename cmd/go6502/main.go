@@ -4,9 +4,7 @@ import (
 	"github.com/J00LZZ/go6502/pkg/bus"
 	"github.com/J00LZZ/go6502/pkg/cpu"
 	"github.com/J00LZZ/go6502/pkg/graphics"
-	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/pixelgl"
-	"image/color"
 	"io/ioutil"
 	"log"
 	"time"
@@ -20,12 +18,7 @@ func run() {
 		Type:     bus.RW,
 	}
 
-	vram := &bus.ByteBus{
-		StartVal: 0x1000,
-		Arr:      make([]byte, 0x1000),
-		Name:     "VRAM",
-		Type:     bus.RW,
-	}
+	ppu := graphics.CreatePPU(0x1000)
 
 	// blink stolen from Ben Eater (he inspired this project)
 	blink, err := ioutil.ReadFile("./code/graphics")
@@ -34,52 +27,19 @@ func run() {
 	}
 
 	rom := &bus.ByteBus{StartVal: 0x8000, Arr: blink, Name: "ROM", Type: bus.R}
-	b := bus.Bus{Devices: []bus.Device{ram, vram, rom}}
+	b := bus.Bus{Devices: []bus.Device{ram, rom, ppu}}
 	c := cpu.CPU{
 		Bus: &b,
 	}
 	c.Reset()
-	tickSpeed := time.Second / 100000
+	tickSpeed := time.Second / 10000
 	ticker := time.NewTicker(tickSpeed)
 	go func() { c.Run(ticker.C) }()
-	window(c, ticker, vram)
+	ppu.RunWindow(c, ticker)
 }
-func window(c cpu.CPU, ticker *time.Ticker, vram *bus.ByteBus) {
-	cfg := pixelgl.WindowConfig{
-		Title:     "go6502",
-		Bounds:    pixel.R(0, 0, 1024, 768),
-		VSync:     true,
-		Resizable: true,
-	}
-	win, err := pixelgl.NewWindow(cfg)
-	if err != nil {
-		panic(err)
-	}
-	win.Clear(color.Gray{Y: 0x20})
 
-	canvas := pixelgl.NewCanvas(pixel.R(0, 0, 64, 64))
-	for !win.Closed() {
-
-		c.Pause = true
-		<-ticker.C
-		pixels2 := make([]byte, 0x4000)
-		for i, v := range vram.Arr {
-			pallet := v >> 5
-			index := v & 0b11111
-			c := graphics.Pallets[pallet][index]
-			pixels2[i*4] = c.R
-			pixels2[i*4+1] = c.G
-			pixels2[i*4+2] = c.B
-			pixels2[i*4+3] = 255
-		}
-		sprite := pixel.NewSprite(canvas, canvas.Bounds())
-		canvas.SetPixels(pixels2)
-		sprite.Draw(win, pixel.IM.Moved(win.Bounds().Center()).Scaled(win.Bounds().Center(), win.Bounds().H()/64))
-		win.Update()
-		c.Pause = false
-	}
-}
 func main() {
-	log.Printf("%d", 0x1000)
+	// handoff needed if graphical output is enabled,
+	// if not enabled it does not add extra overhead.
 	pixelgl.Run(run)
 }
