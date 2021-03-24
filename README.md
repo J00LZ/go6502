@@ -10,7 +10,7 @@ computers when he was younger.
  * [x] Supports loading a file as rom (currently hardcoded)
  * [x] Has actual ram it can load
  * [ ] Add more devices
-    * [ ] Add a basic graphics device
+    * [x] Add a basic graphics device (pixels+pallettes)
     * [ ] Add a realistic graphics device (vga-like output)
     * [ ] Add a device that captures "input"
     * [ ] Add a MMU (memory mapper)
