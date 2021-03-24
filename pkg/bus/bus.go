@@ -10,9 +10,7 @@ type Bus struct {
 
 func (b *Bus) ReadAddress(address uint16) byte {
 	for _, d := range b.Devices {
-		//n := d.GetName()
-		if d.GetRWMode().HasFlag(deviceinfo.R) && address >= d.Start() && address < d.End() {
-			//log.Printf("%v had address %X", n, address)
+		if d.GetRWMode().HasFlag(deviceinfo.R) && address >= d.Start() && address <= d.End() {
 			z := d.LoadAddress(address)
 			return z
 		}

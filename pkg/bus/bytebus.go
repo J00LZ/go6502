@@ -44,6 +44,6 @@ func (b *ByteBus) GetRWMode() deviceinfo.RWMode {
 	return b.RWMode
 }
 
-func (r *ByteBus) GetType() deviceinfo.DeviceType {
+func (b *ByteBus) GetType() deviceinfo.DeviceType {
 	return deviceinfo.RAM
 }

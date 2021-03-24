@@ -82,17 +82,19 @@ func (c *CPU) Reset() {
 	c.SR |= Unused
 }
 
+func (c *CPU) RunInstruction() int {
+	op := c.readAddr()
+	c.PC++
+	instr := instruction.FetchInstruction(op)
+	extra := c.LoadInstruction(instr)
+	return instr.Cycles + int(extra)
+}
+
 func (c *CPU) Run(clock <-chan time.Time) {
-	var op byte
-	var instr *instruction.Instruction
 	for {
 		for c.Pause {
 		}
-		op = c.readAddr()
-		c.PC++
-		instr = instruction.FetchInstruction(op)
-		extra := c.LoadInstruction(instr)
-		tts := instr.Cycles + int(extra)
+		tts := c.RunInstruction()
 		log.Printf("A: %02X, X: %02X, Y: %02X", c.AC, c.X, c.Y)
 		for tts > 0 {
 			tts--
@@ -106,7 +108,7 @@ func (c *CPU) readAddr() byte {
 }
 
 func (c *CPU) LoadInstruction(instr *instruction.Instruction) byte {
-	log.Printf("OP:%v Mode:%v", instr.Opcode, instr.Mode)
+	//log.Printf("OP:%v Mode:%v", instr.Opcode, instr.Mode)
 	addr, extra := c.dataAddr(instr.Mode)
 	extra += c.execute(instr.Opcode, addr)
 	return extra
@@ -336,6 +338,7 @@ func (c *CPU) execute(opcode instruction.Opcode, data uint16) byte {
 		c.pushPC()
 		c.pushStack(byte(c.SR | B))
 		c.PC = uint16(c.ReadAddress(IrqVectorH))<<8 + uint16(c.ReadAddress(IrqVectorL))
+		c.SR |= I
 	case instruction.BVC:
 		if !c.Has(V) {
 			x := byte(0)
@@ -469,7 +472,7 @@ func (c *CPU) execute(opcode instruction.Opcode, data uint16) byte {
 	case instruction.PHA:
 		c.pushStack(c.AC)
 	case instruction.PHP:
-		c.pushStack(byte(c.SR | B))
+		c.pushStack(byte(c.SR))
 	case instruction.PLA:
 		c.AC = c.popStack()
 		c.SetNegative8(c.AC)
