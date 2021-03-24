@@ -1,0 +1,9 @@
+---
+0x0:
+  type: RAM
+  size: 0x1000
+0x1000:
+  type: PPU
+0x8000:
+  type: ROM
+  file: ./code/graphics
