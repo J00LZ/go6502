@@ -1,8 +1,8 @@
 package graphics
 
 import (
-	"github.com/J00LZZ/go6502/pkg/bus"
 	"github.com/J00LZZ/go6502/pkg/cpu"
+	"github.com/J00LZZ/go6502/pkg/deviceinfo"
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/pixelgl"
 	"image/color"
@@ -35,11 +35,20 @@ func (p *PPU) GetName() string {
 	return "PPU"
 }
 
-func (p *PPU) GetType() bus.Type {
-	return bus.W
+func (p *PPU) GetRWMode() deviceinfo.RWMode {
+	return deviceinfo.W
+}
+
+func (p *PPU) GetType() deviceinfo.DeviceType {
+	return deviceinfo.PPU
 }
 
 func CreatePPU(start uint16) *PPU {
+
+	return &PPU{nil, make([]byte, 0x1000), start}
+}
+
+func (p *PPU) RunWindow(c cpu.CPU, ticker *time.Ticker) {
 	cfg := pixelgl.WindowConfig{
 		Title:     "go6502",
 		Bounds:    pixel.R(0, 0, 1024, 768),
@@ -50,10 +59,7 @@ func CreatePPU(start uint16) *PPU {
 	if err != nil {
 		panic(err)
 	}
-	return &PPU{win, make([]byte, 0x1000), start}
-}
-
-func (p *PPU) RunWindow(c cpu.CPU, ticker *time.Ticker) {
+	p.Window = win
 	p.Clear(color.Gray{Y: 0x20})
 
 	canvas := pixelgl.NewCanvas(pixel.R(0, 0, 64, 64))
