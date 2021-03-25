@@ -48,7 +48,7 @@ func CreatePPU(start uint16) *PPU {
 	return &PPU{nil, make([]byte, 0x1000), start}
 }
 
-func (p *PPU) RunWindow(c cpu.CPU, ticker *time.Ticker) {
+func (p *PPU) RunWindow(c *cpu.CPU, ticker *time.Ticker) {
 	cfg := pixelgl.WindowConfig{
 		Title:     "go6502",
 		Bounds:    pixel.R(0, 0, 1024, 768),

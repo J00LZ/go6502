@@ -3,20 +3,33 @@ package main
 import (
 	"github.com/J00LZZ/go6502/pkg/bus"
 	"github.com/J00LZZ/go6502/pkg/cpu"
+	"github.com/J00LZZ/go6502/pkg/interrupt"
 	"github.com/J00LZZ/go6502/pkg/graphics"
 	"github.com/faiface/pixel/pixelgl"
+	"log"
 	"time"
 )
 
-var deviceMap bus.Bus
+var deviceMap *bus.Bus
 
 func run() {
-	deviceMap = bus.Bus{Devices: []bus.Device{bus.NewRam(0x0, 0x1000), bus.NewRom(0x8000, "./code/graphics"), graphics.CreatePPU(0x1000)}}
+	imu := interrupt.NewInterruptManager(0x6000, 16)
+
+	deviceMap, err := bus.New(
+		bus.NewRam(0x0, 0x1000),
+		bus.NewRom(0x8000, "./code/blinkc"),
+		graphics.CreatePPU(0x1000),
+		imu,
+		)
+	if err != nil {
+		log.Fatal(err)
+	}
 	loadMapFile()
 
-	c := cpu.CPU{
-		Bus: &deviceMap,
-	}
+	c := cpu.New(deviceMap)
+	imu.SetNMIFunc(c.NMI)
+	imu.SetIRQFunc(c.IRQ)
+
 	c.Reset()
 	tickSpeed := time.Second / 10000
 	ticker := time.NewTicker(tickSpeed)

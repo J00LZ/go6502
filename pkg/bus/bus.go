@@ -1,11 +1,46 @@
 package bus
 
 import (
+	"fmt"
 	"github.com/J00LZZ/go6502/pkg/deviceinfo"
 )
 
 type Bus struct {
 	Devices []Device
+}
+
+func New(devices ...Device) (*Bus, error) {
+	for _, device1 := range devices {
+		for _, device2 := range devices {
+			if device1 != device2 {
+				if device1.Start() <= device2.End() && device2.Start() <= device1.End() {
+					// check if they are different R/W modes. Those are allowed
+					if device1.GetRWMode() == deviceinfo.R && device2.GetRWMode() == deviceinfo.W {
+						continue
+					}
+
+					if device2.GetRWMode() == deviceinfo.R && device1.GetRWMode() == deviceinfo.W {
+						continue
+					}
+
+					return nil, fmt.Errorf(
+						"Memory ranges of %v (%x..%x) and %v  (%x..%x)  overlap",
+						device1.GetName(),
+						device1.Start(),
+						device1.End(),
+
+						device2.GetName(),
+						device2.Start(),
+						device2.End())
+				}
+			}
+		}
+	}
+
+
+	return &Bus{
+		Devices: devices,
+	}, nil
 }
 
 func (b *Bus) ReadAddress(address uint16) byte {
