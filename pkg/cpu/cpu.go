@@ -117,9 +117,10 @@ func (c *CPU) Run(clock <-chan time.Time) {
 		if instr == nil {
 			log.Panicf("Instruction does not exist, %02X", op)
 		}
-		log.Printf("OP:%v Mode:%v", instr.Opcode, instr.Mode)
+		//log.Printf("OP:%v Mode:%v", instr.Opcode, instr.Mode)
 		extra := c.LoadInstruction(instr)
 		tts := instr.Cycles + int(extra)
+		log.Println(c.DisassembleCurrent())
 		log.Printf("A: %02X, X: %02X, Y: %02X", c.AC, c.X, c.Y)
 		for tts > 0 {
 			tts--
