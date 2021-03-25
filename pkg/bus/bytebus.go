@@ -1,10 +1,21 @@
 package bus
 
+import "github.com/J00LZZ/go6502/pkg/deviceinfo"
+
 type ByteBus struct {
 	StartVal uint16
 	Arr      []byte
 	Name     string
-	Type
+	RWMode   deviceinfo.RWMode
+}
+
+func NewRam(location, size uint16) *ByteBus {
+	return &ByteBus{
+		StartVal: location,
+		Arr:      make([]byte, size),
+		Name:     "RAM",
+		RWMode:   deviceinfo.RW,
+	}
 }
 
 func (b *ByteBus) Start() uint16 {
@@ -29,6 +40,10 @@ func (b *ByteBus) GetName() string {
 	return b.Name
 }
 
-func (b *ByteBus) GetType() Type {
-	return b.Type
+func (b *ByteBus) GetRWMode() deviceinfo.RWMode {
+	return b.RWMode
+}
+
+func (r *ByteBus) GetType() deviceinfo.DeviceType {
+	return deviceinfo.RAM
 }

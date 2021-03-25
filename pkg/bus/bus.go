@@ -2,6 +2,7 @@ package bus
 
 import (
 	"fmt"
+	"github.com/J00LZZ/go6502/pkg/deviceinfo"
 )
 
 type Bus struct {
@@ -36,7 +37,7 @@ func New(devices ...Device) (*Bus, error) {
 func (b *Bus) ReadAddress(address uint16) byte {
 	for _, d := range b.Devices {
 		//n := d.GetName()
-		if d.GetType().HasFlag(R) && address >= d.Start() && address < d.End() {
+		if d.GetRWMode().HasFlag(deviceinfo.R) && address >= d.Start() && address < d.End() {
 			//log.Printf("%v had address %X", n, address)
 			z := d.LoadAddress(address)
 			return z
@@ -47,7 +48,7 @@ func (b *Bus) ReadAddress(address uint16) byte {
 
 func (b *Bus) WriteAddress(address uint16, data byte) {
 	for _, d := range b.Devices {
-		if d.GetType().HasFlag(W) && address >= d.Start() && address < d.End() {
+		if d.GetRWMode().HasFlag(deviceinfo.W) && address >= d.Start() && address < d.End() {
 			d.WriteAddress(address, data)
 		}
 	}
@@ -59,5 +60,6 @@ type Device interface {
 	LoadAddress(address uint16) byte
 	WriteAddress(address uint16, data byte)
 	GetName() string
-	GetType() Type
+	GetRWMode() deviceinfo.RWMode
+	GetType() deviceinfo.DeviceType
 }

@@ -2,7 +2,7 @@ package devices
 
 import (
 	"container/heap"
-	"github.com/J00LZZ/go6502/pkg/bus"
+	"github.com/J00LZZ/go6502/pkg/deviceinfo"
 	"log"
 	"sync"
 )
@@ -100,6 +100,7 @@ type InterruptManager struct {
 	sync.Mutex
 }
 
+
 type InterruptItem struct {
 	id uint8
 	priority uint16
@@ -122,15 +123,15 @@ func NewInterruptManager(start uint16, numInterrupts uint8) *InterruptManager {
 	}
 }
 
-func (i InterruptManager) Start() uint16 {
+func (i *InterruptManager) Start() uint16 {
 	return i.RangeStart
 }
 
-func (i InterruptManager) End() uint16 {
+func (i *InterruptManager) End() uint16 {
 	return i.RangeStart + 3 + uint16(i.NumInterrupts)
 }
 
-func (i InterruptManager) LoadAddress(address uint16) byte {
+func (i *InterruptManager) LoadAddress(address uint16) byte {
 	switch address {
 	case i.RangeStart + 0:
 		res := byte(0)
@@ -160,7 +161,7 @@ func (i InterruptManager) LoadAddress(address uint16) byte {
 	return 0
 }
 
-func (i InterruptManager) WriteAddress(address uint16, data byte) {
+func (i *InterruptManager) WriteAddress(address uint16, data byte) {
 	switch address {
 	case i.RangeStart + 0:
 		if data & 0b00000001 != 0 {
@@ -193,12 +194,16 @@ func (i InterruptManager) WriteAddress(address uint16, data byte) {
 	}
 }
 
-func (i InterruptManager) GetName() string {
+func (i *InterruptManager) GetName() string {
 	return "Interrupt manager"
 }
 
-func (i InterruptManager) GetType() bus.Type {
-	return bus.RW
+func (i *InterruptManager) GetType() deviceinfo.DeviceType {
+	return deviceinfo.IMU
+}
+
+func (i *InterruptManager) GetRWMode() deviceinfo.RWMode {
+	return deviceinfo.RW
 }
 
 func (i *InterruptManager) SetNMIFunc(nmi func()) {

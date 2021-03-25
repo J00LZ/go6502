@@ -7,8 +7,7 @@ computers when he was younger.
 
 ## Features (and todo)
  * [x] Supports the full instruction set of the MOS 6502
- * [x] Supports loading a file as rom (currently hardcoded)
- * [x] Has actual ram it can load
+ * [x] Allows you to create a YAML file to specify the memory locations of devices
  * [ ] Add more devices
     * [x] Add a basic graphics device (pixels+pallettes)
     * [ ] Add a realistic graphics device (vga-like output)
@@ -19,4 +18,26 @@ computers when he was younger.
     * [ ] Add an IMU (interrupt management unit)
     * [ ] Add a DTB (Device Tree blob, tihi)
  * [ ] maybe more?
+
+## Creating a `map.yml`
+This is the default map.yml file, it loads 4kb of ram at address 0, the PPU at address 4096 (also 4kb, 64x64 display)
+and the rom file at address 0x8000, or 32k. 
+```yaml
+---
+0x0:
+  type: RAM
+  size: 0x1000
+0x1000:
+  type: PPU
+0x8000:
+  type: ROM
+  file: ./code/graphics
+```
+Currently, only 1 PPU is supported, and the cpu will only ever use the one with the lowest address, 
+the higher ones will simply provide 4kb of vram. 
+
+The types available are currently
+* RAM: Random access memory, Readable and Writable
+* ROM: Read Only Memory, only Readable
+* PPU: Attaches a display, and provides 4kb of vram.
 
