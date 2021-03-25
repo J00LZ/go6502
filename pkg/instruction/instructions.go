@@ -121,8 +121,8 @@ var z = [][]*Instruction{
 	nil,
 	{ //less pain but still pain
 		nil, nil, ins(BIT, Zpg, 3), nil, nil, nil, nil, nil,
-		ins(STY, Zpg, 3), ins(STY, ZpgX, 4), ins(LDY, Zpg, 3), ins(LDY, AbsX, 4), nil,
-		ins(CPX, Zpg, 3), nil,
+		ins(STY, Zpg, 3), ins(STY, ZpgX, 4), ins(LDY, Zpg, 3), ins(LDY, AbsX, 4),
+		ins(CPY, Zpg, 3), nil, ins(CPX, Zpg, 3), nil,
 	},
 	{
 		ins(ORA, Zpg, 3), ins(ORA, ZpgX, 4), ins(AND, Zpg, 3), ins(AND, ZpgX, 4),
