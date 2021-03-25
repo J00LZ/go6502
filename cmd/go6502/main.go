@@ -3,8 +3,8 @@ package main
 import (
 	"github.com/J00LZZ/go6502/pkg/bus"
 	"github.com/J00LZZ/go6502/pkg/cpu"
-	"github.com/J00LZZ/go6502/pkg/interrupt"
 	"github.com/J00LZZ/go6502/pkg/graphics"
+	"github.com/J00LZZ/go6502/pkg/interrupt"
 	"github.com/faiface/pixel/pixelgl"
 	"log"
 	"time"
@@ -20,11 +20,13 @@ func run() {
 		bus.NewRom(0x8000, "./code/blinkc"),
 		graphics.CreatePPU(0x1000),
 		imu,
-		)
+	)
 	if err != nil {
 		log.Fatal(err)
 	}
-	loadMapFile()
+	if err = loadMapFile(); err != nil {
+		log.Fatal(err)
+	}
 
 	c := cpu.New(deviceMap)
 	imu.SetNMIFunc(c.NMI)

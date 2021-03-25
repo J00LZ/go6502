@@ -7,3 +7,6 @@
 0x8000:
   type: ROM
   file: ./code/graphics
+0x6000:
+  type: IMU
+  size: 16
