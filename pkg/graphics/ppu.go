@@ -65,7 +65,7 @@ func (p *PPU) RunWindow(c *cpu.CPU, ticker *time.Ticker) {
 	canvas := pixelgl.NewCanvas(pixel.R(0, 0, 64, 64))
 	for !p.Closed() {
 
-		c.Pause = true
+		c.Lock()
 		<-ticker.C
 		pixels2 := make([]byte, 0x4000)
 		for i, v := range p.vram {
@@ -81,6 +81,6 @@ func (p *PPU) RunWindow(c *cpu.CPU, ticker *time.Ticker) {
 		canvas.SetPixels(pixels2)
 		sprite.Draw(p, pixel.IM.Moved(p.Bounds().Center()).Scaled(p.Bounds().Center(), p.Bounds().H()/64))
 		p.Update()
-		c.Pause = false
+		c.Unlock()
 	}
 }
