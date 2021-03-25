@@ -41,3 +41,7 @@ The types available are currently
 * ROM: Read Only Memory, only Readable
 * PPU: Attaches a display, and provides 4kb of vram.
 
+## Writing C for the 6502
+* Always link to reset.o (or reset.s)
+* Call your main function `reset`, in your main.c file
+* have fun!

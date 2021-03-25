@@ -9,7 +9,7 @@ import (
 	"io/ioutil"
 )
 
-func loadMapFile() error {
+func loadMapFile() (*bus.Bus, error) {
 	f, err := ioutil.ReadFile("./map.yml")
 	if err == nil {
 		var devMap deviceinfo.DeviceMap
@@ -28,17 +28,18 @@ func loadMapFile() error {
 					devices = append(devices, interrupt.NewInterruptManager(addr, uint8(def.Size)))
 				}
 			}
-			deviceMap, err = bus.New(devices...)
+			deviceMap, err := bus.New(devices...)
 
 			if err != nil {
-				return err
+				return nil, err
 			}
+			return deviceMap, nil
+
 		}
 	}
 
-	return nil
+	return nil, err
 }
-
 
 func findPPU(b *bus.Bus) *graphics.PPU {
 	for _, d := range b.Devices {

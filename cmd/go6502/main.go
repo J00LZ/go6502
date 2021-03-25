@@ -10,8 +10,6 @@ import (
 	"time"
 )
 
-var deviceMap *bus.Bus
-
 func run() {
 	imu := interrupt.NewInterruptManager(0x6000, 16)
 
@@ -24,8 +22,11 @@ func run() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	if err = loadMapFile(); err != nil {
+	m, err := loadMapFile()
+	if err != nil {
 		log.Fatal(err)
+	} else {
+		deviceMap = m
 	}
 
 	c := cpu.New(deviceMap)
