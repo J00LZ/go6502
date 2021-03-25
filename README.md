@@ -42,6 +42,7 @@ The types available are currently
 * PPU: Attaches a display, and provides 4kb of vram.
 
 ## Writing C for the 6502
+You can use the `code/Makefile` as an example
 * Always link to reset.o (or reset.s)
 * Call your main function `reset`, in your main.c file
 * have fun!
