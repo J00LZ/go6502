@@ -1,37 +1,23 @@
 package main
 
 import (
-	"github.com/J00LZZ/go6502/pkg/bus"
 	"github.com/J00LZZ/go6502/pkg/cpu"
-	"github.com/J00LZZ/go6502/pkg/graphics"
-	"github.com/J00LZZ/go6502/pkg/interrupt"
 	"github.com/faiface/pixel/pixelgl"
 	"log"
 	"time"
 )
 
 func run() {
-	imu := interrupt.NewInterruptManager(0x6000, 16)
-
-	deviceMap, err := bus.New(
-		bus.NewRam(0x0, 0x1000),
-		bus.NewRom(0x8000, "./code/blinkc"),
-		graphics.CreatePPU(0x1000),
-		imu,
-	)
+	deviceMap, err := loadMapFile()
 	if err != nil {
 		log.Fatal(err)
-	}
-	m, err := loadMapFile()
-	if err != nil {
-		log.Fatal(err)
-	} else {
-		deviceMap = m
 	}
 
 	c := cpu.New(deviceMap)
-	imu.SetNMIFunc(c.NMI)
-	imu.SetIRQFunc(c.IRQ)
+	if imu := findIMU(deviceMap); imu != nil {
+		imu.SetNMIFunc(c.NMI)
+		imu.SetIRQFunc(c.IRQ)
+	}
 
 	c.Reset()
 	tickSpeed := time.Second / 10000

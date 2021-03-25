@@ -114,6 +114,10 @@ func (c *CPU) Run(clock <-chan time.Time) {
 		op = c.readAddr()
 		c.PC++
 		instr = instruction.FetchInstruction(op)
+		if instr == nil {
+			log.Panicf("Instruction does not exist, %02X", op)
+		}
+		log.Printf("OP:%v Mode:%v", instr.Opcode, instr.Mode)
 		extra := c.LoadInstruction(instr)
 		tts := instr.Cycles + int(extra)
 		log.Printf("A: %02X, X: %02X, Y: %02X", c.AC, c.X, c.Y)
@@ -129,7 +133,6 @@ func (c *CPU) readAddr() byte {
 }
 
 func (c *CPU) LoadInstruction(instr *instruction.Instruction) byte {
-	log.Printf("OP:%v Mode:%v", instr.Opcode, instr.Mode)
 	addr, extra := c.dataAddr(instr.Mode)
 	extra += c.execute(instr.Opcode, addr)
 	return extra
