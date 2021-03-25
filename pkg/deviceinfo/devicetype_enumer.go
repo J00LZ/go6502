@@ -8,9 +8,9 @@ import (
 	"fmt"
 )
 
-const _DeviceTypeName = "ROMRAMPPU"
+const _DeviceTypeName = "ROMRAMPPUIMU"
 
-var _DeviceTypeIndex = [...]uint8{0, 3, 6, 9}
+var _DeviceTypeIndex = [...]uint8{0, 3, 6, 9, 12}
 
 func (i DeviceType) String() string {
 	if i < 0 || i >= DeviceType(len(_DeviceTypeIndex)-1) {
@@ -19,12 +19,13 @@ func (i DeviceType) String() string {
 	return _DeviceTypeName[_DeviceTypeIndex[i]:_DeviceTypeIndex[i+1]]
 }
 
-var _DeviceTypeValues = []DeviceType{0, 1, 2}
+var _DeviceTypeValues = []DeviceType{0, 1, 2, 3}
 
 var _DeviceTypeNameToValueMap = map[string]DeviceType{
-	_DeviceTypeName[0:3]: 0,
-	_DeviceTypeName[3:6]: 1,
-	_DeviceTypeName[6:9]: 2,
+	_DeviceTypeName[0:3]:  0,
+	_DeviceTypeName[3:6]:  1,
+	_DeviceTypeName[6:9]:  2,
+	_DeviceTypeName[9:12]: 3,
 }
 
 // DeviceTypeString retrieves an enum value from the enum constants string name.

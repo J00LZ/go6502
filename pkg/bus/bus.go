@@ -14,6 +14,15 @@ func New(devices ...Device) (*Bus, error) {
 		for _, device2 := range devices {
 			if device1 != device2 {
 				if device1.Start() <= device2.End() && device2.Start() <= device1.End() {
+					// check if they are different R/W modes. Those are allowed
+					if device1.GetRWMode() == deviceinfo.R && device2.GetRWMode() == deviceinfo.W {
+						continue
+					}
+
+					if device2.GetRWMode() == deviceinfo.R && device1.GetRWMode() == deviceinfo.W {
+						continue
+					}
+
 					return nil, fmt.Errorf(
 						"Memory ranges of %v (%x..%x) and %v  (%x..%x)  overlap",
 						device1.GetName(),

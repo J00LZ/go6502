@@ -3,7 +3,7 @@ package main
 import (
 	"github.com/J00LZZ/go6502/pkg/bus"
 	"github.com/J00LZZ/go6502/pkg/cpu"
-	"github.com/J00LZZ/go6502/pkg/devices"
+	"github.com/J00LZZ/go6502/pkg/interrupt"
 	"github.com/J00LZZ/go6502/pkg/graphics"
 	"github.com/faiface/pixel/pixelgl"
 	"log"
@@ -13,11 +13,11 @@ import (
 var deviceMap *bus.Bus
 
 func run() {
-	imu := devices.NewInterruptManager(0x6000, 16)
+	imu := interrupt.NewInterruptManager(0x6000, 16)
 
 	deviceMap, err := bus.New(
 		bus.NewRam(0x0, 0x1000),
-		bus.NewRom(0x8000, "./code/graphics"),
+		bus.NewRom(0x8000, "./code/blinkc"),
 		graphics.CreatePPU(0x1000),
 		imu,
 		)

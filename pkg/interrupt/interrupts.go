@@ -1,4 +1,4 @@
-package devices
+package interrupt
 
 import (
 	"container/heap"

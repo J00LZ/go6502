@@ -8,4 +8,5 @@ const (
 	ROM DeviceType = iota
 	RAM
 	PPU
+	IMU
 )
