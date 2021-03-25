@@ -15,7 +15,7 @@ func run() {
 
 	deviceMap, err := bus.New(
 		bus.NewRam(0x0, 0x1000),
-		bus.NewRom(0x8000, "./code/blinkc"),
+		bus.NewRom(0x8000, "./code/graphics"),
 		graphics.CreatePPU(0x1000),
 		imu,
 	)

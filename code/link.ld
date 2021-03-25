@@ -22,6 +22,10 @@ SEGMENTS {
         load = RAM1
         type=bss
         define=yes;
+    ZEROPAGE:
+        load = RAM1
+        type = zp
+        define = yes;
     RESET:
         load = ROM1
         start = $fffa
