@@ -22,15 +22,9 @@ SEGMENTS {
         load = RAM1
         type=bss
         define=yes;
-
     RESET:
         load = ROM1
-        start = $fffc
-        type = overwrite;
+        start = $fffa
+        type = ro;
 }
 
-
-FEATURES {
-    STARTADDRESS:
-        default = $8000;
-}

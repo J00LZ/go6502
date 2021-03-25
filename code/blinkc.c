@@ -1,15 +1,13 @@
+int a;
 
-void loop();
-
+void loop() {
+    a = 4;
+}
 
 void reset() {
-    while (1) {
-        loop();
-    }
+    a = 3;
+    loop();
+
 }
 
 
-int a = 0;
-void loop() {
-    a += 1;
-}
