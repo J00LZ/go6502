@@ -53,7 +53,7 @@ func CreatePPU(start uint16) *PPU {
 	return &PPU{win, make([]byte, 0x1000), start}
 }
 
-func (p *PPU) RunWindow(c cpu.CPU, ticker *time.Ticker) {
+func (p *PPU) RunWindow(c *cpu.CPU, ticker *time.Ticker) {
 	p.Clear(color.Gray{Y: 0x20})
 
 	canvas := pixelgl.NewCanvas(pixel.R(0, 0, 64, 64))

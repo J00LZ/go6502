@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/J00LZZ/go6502/pkg/bus"
 	"github.com/J00LZZ/go6502/pkg/cpu"
+	"github.com/J00LZZ/go6502/pkg/devices"
 	"github.com/J00LZZ/go6502/pkg/graphics"
 	"github.com/faiface/pixel/pixelgl"
 	"io/ioutil"
@@ -19,6 +20,7 @@ func run() {
 	}
 
 	ppu := graphics.CreatePPU(0x1000)
+	imu := devices.NewInterruptManager(0x6000, 16)
 
 	// blink stolen from Ben Eater (he inspired this project)
 	blink, err := ioutil.ReadFile("./code/graphics")
@@ -27,10 +29,15 @@ func run() {
 	}
 
 	rom := &bus.ByteBus{StartVal: 0x8000, Arr: blink, Name: "ROM", Type: bus.R}
-	b := bus.Bus{Devices: []bus.Device{ram, rom, ppu}}
-	c := cpu.CPU{
-		Bus: &b,
+	b, err := bus.New(ram, rom, ppu, imu)
+	if err != nil {
+		log.Fatal(err)
 	}
+	c := cpu.New(b)
+
+	imu.SetNMIFunc(c.NMI)
+	imu.SetIRQFunc(c.IRQ)
+
 	c.Reset()
 	tickSpeed := time.Second / 10000
 	ticker := time.NewTicker(tickSpeed)

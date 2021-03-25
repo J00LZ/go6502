@@ -4,6 +4,7 @@ import (
 	"github.com/J00LZZ/go6502/pkg/bus"
 	"github.com/J00LZZ/go6502/pkg/instruction"
 	"log"
+	"sync"
 	"time"
 )
 
@@ -28,6 +29,24 @@ type CPU struct {
 	SP    byte
 	Pause bool
 	*bus.Bus
+
+	// TODO: locks may be slow, could be solved by having interrupts set an atomic variable
+	// which is checked before executing each instruction
+	sync.Mutex
+}
+
+func New(bus *bus.Bus) *CPU {
+	return &CPU{
+		PC:    0,
+		AC:    0,
+		X:     0,
+		Y:     0,
+		SR:    0,
+		SP:    0,
+		Pause: false,
+		Bus:   bus,
+		Mutex: sync.Mutex{},
+	}
 }
 
 func (c *CPU) pushStack(d byte) {
@@ -65,11 +84,15 @@ func (c *CPU) IRQ() {
 }
 
 func (c *CPU) NMI() {
+	c.Lock()
+	defer c.Unlock()
+
 	c.Clear(B)
 	c.pushPC()
 	c.pushStack(byte(c.SR))
 	c.Set(I)
 	c.PC = uint16(c.ReadAddress(NmiVectorH))<<8 + uint16(c.ReadAddress(NmiVectorL))
+
 }
 
 func (c *CPU) Reset() {
@@ -208,6 +231,12 @@ func (c *CPU) dataAddr(mode instruction.Mode) (uint16, byte) {
 }
 
 func (c *CPU) execute(opcode instruction.Opcode, data uint16) byte {
+	// Lock the cpu lock to make sure only *one* thread can execute code on the cpu
+	// at a time. This to make sure interrupts will never interrupt while in the middle
+	// of executing an instruction.
+	c.Lock()
+	defer c.Unlock()
+
 	switch opcode {
 	case instruction.ADC:
 		m := c.ReadAddress(data)
