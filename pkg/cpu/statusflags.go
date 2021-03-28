@@ -19,6 +19,14 @@ func (c *CPU) Clear(flag StatusFlags)    { c.SR = c.SR &^ flag }
 func (c *CPU) Toggle(flag StatusFlags)   { c.SR = ^ flag }
 func (c *CPU) Has(flag StatusFlags) bool { return c.SR&flag != 0 }
 
+func (c *CPU) Val(flag StatusFlags) int {
+	if c.Has(flag) {
+		return 1
+	} else {
+		return 0
+	}
+}
+
 func (c *CPU) IfCarry() byte {
 	if c.Has(C) {
 		return 1

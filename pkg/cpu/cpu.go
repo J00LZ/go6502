@@ -21,31 +21,33 @@ const NmiVectorH uint16 = 0xFFFB
 const NmiVectorL uint16 = 0xFFFA
 
 type CPU struct {
-	PC    uint16
-	AC    byte
-	X     byte
-	Y     byte
-	SR    StatusFlags
-	SP    byte
-	Pause bool
+	PC     uint16
+	AC     byte
+	X      byte
+	Y      byte
+	SR     StatusFlags
+	SP     byte
+	Manual bool
 	*bus.Bus
+	Speed time.Duration
 
 	// TODO: locks may be slow, could be solved by having interrupts set an atomic variable
 	// which is checked before executing each instruction
 	sync.Mutex
 }
 
-func New(bus *bus.Bus) *CPU {
+func New(bus *bus.Bus, speed time.Duration) *CPU {
 	return &CPU{
-		PC:    0,
-		AC:    0,
-		X:     0,
-		Y:     0,
-		SR:    0,
-		SP:    0,
-		Pause: false,
-		Bus:   bus,
-		Mutex: sync.Mutex{},
+		PC:     0,
+		AC:     0,
+		X:      0,
+		Y:      0,
+		SR:     0,
+		SP:     0,
+		Manual: false,
+		Bus:    bus,
+		Speed:  speed,
+		Mutex:  sync.Mutex{},
 	}
 }
 
@@ -109,8 +111,6 @@ func (c *CPU) Run(clock <-chan time.Time) {
 	var op byte
 	var instr *instruction.Instruction
 	for {
-		for c.Pause {
-		}
 		op = c.readAddr()
 		c.PC++
 		instr = instruction.FetchInstruction(op)
@@ -123,7 +123,11 @@ func (c *CPU) Run(clock <-chan time.Time) {
 		log.Println(c.DisassembleCurrent())
 		log.Printf("A: %02X, X: %02X, Y: %02X", c.AC, c.X, c.Y)
 		for tts > 0 {
-			tts--
+			if c.Manual {
+				tts = 0
+			} else {
+				tts--
+			}
 			<-clock
 		}
 	}
