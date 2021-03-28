@@ -13,23 +13,24 @@ func run() {
 		log.Fatal(err)
 	}
 
-	c := cpu.New(deviceMap)
+	tickSpeed := time.Second / 10
+	c := cpu.New(deviceMap, tickSpeed)
 	if imu := findIMU(deviceMap); imu != nil {
 		imu.SetNMIFunc(c.NMI)
 		imu.SetIRQFunc(c.IRQ)
 	}
 
 	c.Reset()
-	tickSpeed := time.Second / 10000
-	ticker := time.NewTicker(tickSpeed)
+	t := time.NewTicker(c.Speed)
+	ticker := cpu.NewTicker(t)
 
 	if ppu := findPPU(c.Bus); ppu != nil {
 		go func() {
-			c.Run(ticker.C)
+			c.Run(ticker.T)
 		}()
 		ppu.RunWindow(c, ticker)
 	} else {
-		c.Run(ticker.C)
+		c.Run(ticker.T)
 	}
 
 }

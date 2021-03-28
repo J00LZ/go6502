@@ -10,6 +10,19 @@ func ins(instructionType Opcode, mode Mode, cycles int) *Instruction {
 	return &Instruction{instructionType, mode, cycles}
 }
 
+func (i *Instruction) Size() uint16 {
+	x := 1
+	switch i.Mode {
+	case Acc, Impl:
+		x += 0
+	case Immediate, Rel, Zpg, ZpgX, ZpgY, Xind, IndY:
+		x += 1
+	case Abs, AbsX, AbsY, Ind:
+		x += 2
+	}
+	return uint16(x)
+}
+
 type Opcode int
 type Mode int
 
